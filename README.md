@@ -72,4 +72,4 @@ Now when someone asks "where's the JIRA?" you can point to the branch name.
 
 ## License
 
-MIT. Use it however you want.
+GPLv3. Use it however you want, but commit what you change.
