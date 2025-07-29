@@ -1,0 +1,28 @@
+{
+  "name": "wheres-the-jira",
+  "version": "2.0.0",
+  "description": "Auto-create Shortcut stories or JIRA issues from git commits using AI",
+  "main": "dist/index.js",
+  "bin": {
+    "wtj": "./bin/install.js",
+    "wtj-run": "./bin/run-hook.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "install-hook": "node bin/install.js"
+  },
+  "dependencies": {
+    "openai": "^4.28.4",
+    "simple-git": "^3.20.0",
+    "chalk": "^4.1.2",
+    "inquirer": "^8.2.6",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/inquirer": "^8.2.10",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}
