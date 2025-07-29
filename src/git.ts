@@ -19,6 +19,8 @@ interface GitRepository {
   readonly getDiffSummary: (baseBranch: string) => Promise<any>;
   readonly createBranch: (newBranch: string, fromBranch: string) => Promise<void>;
   readonly deleteBranch: (branch: string) => Promise<void>;
+  readonly pushBranch: (branch: string, setUpstream: boolean) => Promise<void>;
+  readonly deleteRemoteBranch: (branch: string) => Promise<void>;
 }
 
 // === Git Repository Implementation ===
@@ -37,6 +39,14 @@ export const createGitRepository = (): GitRepository => {
       git.checkoutBranch(newBranch, fromBranch),
     deleteBranch: async (branch: string) => {
       await git.deleteLocalBranch(branch);
+    },
+    pushBranch: async (branch: string, setUpstream: boolean) => {
+      await (setUpstream 
+        ? git.push(['--set-upstream', 'origin', branch])
+        : git.push(['origin', branch]));
+    },
+    deleteRemoteBranch: async (branch: string) => {
+      await git.push(['origin', '--delete', branch]);
     }
   };
 };
@@ -46,8 +56,11 @@ export const shouldSkipBranch = (
   branch: BranchName,
   skipBranches: readonly string[]
 ): boolean => {
-  // Skip if already has story ID (sc-123 format)
+  // Skip if already has story ID (sc-123 format for Shortcut)
   if (/^sc-\d+/.test(branch)) return true;
+  
+  // Skip if already has JIRA issue key (PROJ-123 format)
+  if (/^[A-Z]+-\d+/.test(branch)) return true;
   
   // Skip if in skip list
   if (skipBranches.includes(branch)) return true;
@@ -121,14 +134,34 @@ export const analyzeGitChanges = async (
 // === Branch Management ===
 export const createStoryBranch = async (
   currentBranch: BranchName,
-  storyId: number,
+  storyId: number | string,
   repository: GitRepository = createGitRepository()
 ): AsyncResult<BranchName> => {
   try {
-    const newBranchName = `sc-${storyId}-${sanitizeBranchName(currentBranch)}` as BranchName;
+    const prefix = typeof storyId === 'string' ? storyId : `sc-${storyId}`;
+    const newBranchName = `${prefix}-${sanitizeBranchName(currentBranch)}` as BranchName;
     
+    // Create and checkout new branch
     await repository.createBranch(newBranchName, currentBranch);
-    await repository.deleteBranch(currentBranch);
+    
+    // Push the new branch to remote with upstream tracking
+    await repository.pushBranch(newBranchName, true);
+    
+    // Delete the old local branch (we're now on the new branch)
+    try {
+      await repository.deleteBranch(currentBranch);
+    } catch (e) {
+      // If delete fails, it's ok - might be protected or have uncommitted changes
+      console.warn(`Could not delete old branch ${currentBranch}: ${e}`);
+    }
+    
+    // Try to delete the old remote branch if it exists
+    try {
+      await repository.deleteRemoteBranch(currentBranch);
+    } catch (e) {
+      // If remote delete fails, it's ok - might not exist or be protected
+      console.warn(`Could not delete remote branch ${currentBranch}: ${e}`);
+    }
     
     return success(newBranchName);
   } catch (error) {
