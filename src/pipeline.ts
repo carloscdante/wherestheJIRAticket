@@ -57,8 +57,13 @@ export const executeAnalysisPipeline = async (
 export const handlePipelineSuccess = (pipeline: AnalysisPipeline): void => {
   console.log('✅ Issue created successfully!');
   console.log(`📋 Issue: ${pipeline.createdStory.app_url}`);
-  console.log(`🌿 Branch: ${pipeline.updatedBranch}`);
+  console.log(`🌿 Branch renamed to: ${pipeline.updatedBranch}`);
   console.log(`🎯 Confidence: ${Math.round(pipeline.storyAnalysis.confidence * 100)}%`);
+  console.log('\n⚠️  Push aborted to complete branch rename.');
+  console.log('📌 Please run "git push" again to push the renamed branch.');
+  
+  // Exit with non-zero to abort the current push
+  process.exit(1);
 };
 
 export const handlePipelineError = (error: Error): void => {

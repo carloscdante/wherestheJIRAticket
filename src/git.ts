@@ -21,6 +21,7 @@ interface GitRepository {
   readonly deleteBranch: (branch: string) => Promise<void>;
   readonly pushBranch: (branch: string, setUpstream: boolean) => Promise<void>;
   readonly deleteRemoteBranch: (branch: string) => Promise<void>;
+  readonly remoteBranchExists: (branch: string) => Promise<boolean>;
 }
 
 // === Git Repository Implementation ===
@@ -47,6 +48,14 @@ export const createGitRepository = (): GitRepository => {
     },
     deleteRemoteBranch: async (branch: string) => {
       await git.push(['origin', '--delete', branch]);
+    },
+    remoteBranchExists: async (branch: string) => {
+      try {
+        const result = await git.listRemote(['--heads', 'origin', branch]);
+        return result.trim().length > 0;
+      } catch {
+        return false;
+      }
     }
   };
 };
@@ -144,9 +153,6 @@ export const createStoryBranch = async (
     // Create and checkout new branch
     await repository.createBranch(newBranchName, currentBranch);
     
-    // Push the new branch to remote with upstream tracking
-    await repository.pushBranch(newBranchName, true);
-    
     // Delete the old local branch (we're now on the new branch)
     try {
       await repository.deleteBranch(currentBranch);
@@ -155,13 +161,8 @@ export const createStoryBranch = async (
       console.warn(`Could not delete old branch ${currentBranch}: ${e}`);
     }
     
-    // Try to delete the old remote branch if it exists
-    try {
-      await repository.deleteRemoteBranch(currentBranch);
-    } catch (e) {
-      // If remote delete fails, it's ok - might not exist or be protected
-      console.warn(`Could not delete remote branch ${currentBranch}: ${e}`);
-    }
+    // Don't push the new branch - let the user do it after the hook completes
+    // This avoids the issue where the pre-push hook runs after git push is initiated
     
     return success(newBranchName);
   } catch (error) {
