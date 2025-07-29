@@ -4,8 +4,8 @@
   "description": "Auto-create Shortcut stories or JIRA issues from git commits using AI",
   "main": "dist/index.js",
   "bin": {
-    "wtj": "./bin/install.js",
-    "wtj-run": "./bin/run-hook.js"
+    "wtj": "bin/install.js",
+    "wtj-run": "bin/run-hook.js"
   },
   "scripts": {
     "build": "tsc",
