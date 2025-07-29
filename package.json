@@ -1,6 +1,6 @@
 {
   "name": "wheres-the-jira",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Auto-create Shortcut stories or JIRA issues from git commits using AI",
   "main": "dist/index.js",
   "bin": {
