@@ -39,7 +39,7 @@ export const validateConfig = (data: any): Result<AppConfig, Error> => {
     tracker: trackerResult.data as TrackerType,
     openai: {
       token: openaiResult.data,
-      model: data.openaiModel || 'gpt-4'
+      model: data.openaiModel || 'gpt-4.1'
     },
     git: {
       baseBranch: baseBranchResult.data,
