@@ -1,6 +1,6 @@
 # Where's the JIRA Ticket? 🎫
 
-A utility for engineers who want to work fast and freeform, without getting asked "where's the story?" or "where's the ticket?" Because that's annoying as hell.
+A utility for engineers who want to work fast and freeform, without getting asked "where's the story?" or "where's the ticket?" Because absolutely no one wants to do that.
 
 ## Why? 🤔
 
